@@ -1,74 +1,82 @@
 # WSL + VS Code Developer Setup
 
-A Windows 11 PowerShell installer that configures a Linux-based C development environment for Visual Studio Code.
+One-command Windows 11 development-environment bootstrap for **WSL 2, Ubuntu, Visual Studio Code, GCC, GDB, Make and Git**.
 
-**Author:** Jad Matar  
-**Contact:** [jadmatar.dev@gmail.com](mailto:jadmatar.dev@gmail.com)  
-**Repository:** https://github.com/jadmatar628-web/wsl-vscode-dev-setup
+**Created by Jad Matar** · [jadmatar.dev@gmail.com](mailto:jadmatar.dev@gmail.com)  
+Source: https://github.com/jadmatar628-web/wsl-vscode-dev-setup
 
-## What it installs
+## One command from CMD
 
-- WSL 2 and Ubuntu 24.04 (or uses an existing Ubuntu installation)
-- Visual Studio Code
-- Microsoft's VS Code **WSL** extension (`ms-vscode-remote.remote-wsl`)
-- Linux development tools: GCC, GDB, Make, Git, and related build essentials
-- `~/projects` directory inside Ubuntu
+Open **Command Prompt** (CMD) on Windows 11 and paste:
 
-## Requirements
+```cmd
+curl.exe -fL https://raw.githubusercontent.com/jadmatar628-web/wsl-vscode-dev-setup/main/bootstrap.cmd -o "%TEMP%\wsl-bootstrap.cmd" && call "%TEMP%\wsl-bootstrap.cmd"
+```
 
-- Windows 11 with administrator access
-- Internet connection
-- Windows Package Manager (`winget`)
-- Hardware virtualization enabled (if required by your system)
-- Enough free space for Ubuntu and development tools
+You can review [bootstrap.cmd](./bootstrap.cmd) before running it. Windows may request administrator permission. **First-time WSL setup can require a restart and creating an Ubuntu username/password.** If a restart is required, rerun the same CMD command (or run `%USERPROFILE%\wsl-vscode-dev-setup\bootstrap.cmd` from the existing clone).
 
-## Run the installer
+This bootstrap:
+1. Checks for Git and installs Git with winget only when missing.
+2. Clones this public repository to `%USERPROFILE%\wsl-vscode-dev-setup`, or fast-forwards the existing clone.
+3. Runs `setup-wsl-vscode.ps1` with one click-free handoff; PowerShell requests elevation when required.
+4. Checks for Ubuntu 24.04 or an existing Ubuntu; installs WSL + Ubuntu only when absent.
+5. Checks for VS Code and its WSL extension before installing.
+6. In Ubuntu, installs **only missing** packages from `build-essential`, `gdb`, `git`, `wget`, `ca-certificates`. `build-essential` includes GCC and Make.
+7. Creates `~/projects` if needed and attempts to install VS Code's C/C++ extension in WSL.
 
-1. Download [`setup-wsl-vscode.ps1`](./setup-wsl-vscode.ps1).
-2. Open **Windows PowerShell as Administrator** in its folder.
-3. Run:
+## Alternative: clone manually
 
-   ```powershell
-   powershell -ExecutionPolicy Bypass -File .\setup-wsl-vscode.ps1
-   ```
+If you already have Git:
 
-4. If Windows requests a restart, restart and **run the same script again**.
-5. When Ubuntu opens for the first time, create your Linux username and password if prompted, then enter `exit` to return to the installer.
-6. After installation, launch Ubuntu and run:
+```cmd
+git clone https://github.com/jadmatar628-web/wsl-vscode-dev-setup.git
+cd wsl-vscode-dev-setup
+bootstrap.cmd
+```
 
-   ```bash
-   cd ~/projects && code .
-   ```
+If you already have the repository cloned, simply run `bootstrap.cmd` again.
 
-7. In your WSL-connected VS Code window, install the Microsoft **C/C++** extension (`ms-vscode.cpptools`) for C debugging.
+## Usage after setup
 
-The script may need multiple runs to finish a first-time WSL installation across Windows restarts. It checks for existing components and does not deliberately delete WSL distributions or project files.
-
-## Verify
-
-Inside the Ubuntu / WSL terminal:
+In an Ubuntu terminal:
 
 ```bash
-uname -a
+cd ~/projects
+code .
+```
+
+Verify your Linux tools:
+
+```bash
 gcc --version
 gdb --version
 make --version
 ```
 
-## Build the Windows EXE
+If the C/C++ extension could not be installed remotely on the first run, open VS Code connected to WSL and install **C/C++** by Microsoft (`ms-vscode.cpptools`) from Extensions.
 
-On Windows, from the repository directory, run:
+## What it does not do
+
+- It does **not** overwrite or unregister existing WSL distributions, delete projects, or intentionally reinstall existing tools.
+- It does **not** bundle the downloaded software, and requires an internet connection for missing software.
+- It does **not** guarantee a zero-interaction setup: Windows administrator consent, a possible reboot, and creating a first Ubuntu account can be required.
+- It does **not** guarantee all optional features will install on every Windows configuration; failures need troubleshooting.
+- The script is not yet end-to-end tested on a clean Windows 11 machine. Review its source before installing.
+
+## Build an EXE
+
+From the local repository directory in Windows PowerShell, run:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\build-exe.ps1
 ```
 
-This creates `WSL-Installer.exe` using the community PS2EXE PowerShell module. It embeds the PowerShell script; it **does not** bundle Ubuntu, WSL, VS Code, or their downloads. An internet connection is still required.
+The output is `WSL-Installer.exe`. It embeds the PowerShell installer but still downloads missing dependencies from Microsoft and Ubuntu. It is not code-signed and may trigger SmartScreen. The **CMD bootstrap** is the recommended way to clone the repo and run the newest version.
 
-The executable is **not code-signed**. Windows may show a SmartScreen warning, and its author metadata is not proof of cryptographic identity. Only distribute builds you have reviewed and tested.
+## Attribution
 
-## Source and attribution
+Created by **Jad Matar**  
+Contact: **jadmatar.dev@gmail.com**  
+Repository: https://github.com/jadmatar628-web/wsl-vscode-dev-setup
 
-This project is maintained by **Jad Matar**. For feedback or questions, contact **jadmatar.dev@gmail.com**. The PowerShell header, terminal banner, and EXE metadata carry source and attribution details.
-
-Copyright © 2026 Jad Matar. All rights reserved. **No open-source license has been granted.** Public visibility of source code does not, by itself, grant redistribution or modification rights.
+Copyright © 2026 Jad Matar. All rights reserved. No license for redistribution or modification has been granted.
